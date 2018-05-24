@@ -1,27 +1,94 @@
-# ElementsDemo
+# Create Elements (Web Components) with Angular 6
+```
+npm i -g @angular/cli
+ng new elements-demo --prefix custom
+ng add @angular/elements
+ng g component button --inline-style --inline-template -v Native
+```
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.3.
+Button component should be
+```ts
+import { Input, Component, ViewEncapsulation, EventEmitter, Output } from '@angular/core';
 
-## Development server
+@Component({
+  selector: 'custom-button',
+  template: `<button (click)="handleClick()">{{label}}</button>`,
+  styles: [`
+    button {
+      border: solid 3px;
+      padding: 8px 10px;
+      background: #bada55;
+      font-size: 20px;
+    }
+  `],
+  encapsulation: ViewEncapsulation.Native
+})
+export class ButtonComponent {
+  @Input() label = 'default label';
+  @Output() action = new EventEmitter<number>();
+  private clicksCt = 0;
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+  handleClick() {
+    this.clicksCt++;
+    this.action.emit(this.clicksCt);
+  }
+}
+```
 
-## Code scaffolding
+app module should be
+```ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule, Injector } from '@angular/core';
+import { createCustomElement } from '@angular/elements';
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+import { ButtonComponent } from './button/button.component';
 
-## Build
+@NgModule({
+  declarations: [ButtonComponent],
+  imports: [BrowserModule],
+  entryComponents: [ButtonComponent]
+})
+export class AppModule {
+  constructor(private injector: Injector) {
+    const customButton = createCustomElement(ButtonComponent, { injector });
+    customElements.define('custom-button', customButton);
+  }
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+  ngDoBootstrap() {}
+}
+```
 
-## Running unit tests
+Add this to package.json
+```json
+"build": "ng build --prod --output-hashing=none",
+"package": "cat dist/elements-demo/{runtime,polyfills,scripts,main}.js | gzip > elements.js.gz"
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+html in anywhere outside angular should look similar to this:
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+```html
+<!DOCTYPE html>
+<html lang="en">
 
-## Further help
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Button Test Page</title>
+  <script src="elements.js"></script>
+</head>
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+<body>
+  <custom-button label="First Value"></custom-button>
+
+  <script>
+    const button = document.querySelector('custom-button');
+    button.addEventListener('action', (event) => {
+      console.log(`"action" emitted: ${event.detail}`);
+    })
+    setTimeout(() => button.label = 'Second Value', 3000);
+
+  </script>
+</body>
+
+</html>
+```
