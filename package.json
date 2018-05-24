@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --prod --output-hashing=none",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "package": "cat dist/elements-demo/{runtime,polyfills,scripts,main}.js | gzip > elements.js.gz"
   },
   "private": true,
   "dependencies": {
@@ -15,6 +16,7 @@
     "@angular/common": "^6.0.2",
     "@angular/compiler": "^6.0.2",
     "@angular/core": "^6.0.2",
+    "@angular/elements": "^6.0.3",
     "@angular/forms": "^6.0.2",
     "@angular/http": "^6.0.2",
     "@angular/platform-browser": "^6.0.2",
@@ -22,7 +24,8 @@
     "@angular/router": "^6.0.2",
     "core-js": "^2.5.4",
     "rxjs": "^6.0.0",
-    "zone.js": "^0.8.26"
+    "zone.js": "^0.8.26",
+    "document-register-element": "^1.7.2"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^6.0.2",
